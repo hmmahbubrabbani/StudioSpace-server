@@ -117,15 +117,15 @@ app.get('/studios/:id', async (req, res) =>{
 });
 
 // UPDATE / EDIT a studio listingwith verifyToken
-app.put('/studios/:id', verifyToken, async (req, res) => {
+app.put('/studios/:id', verifyToken, async (req, res) =>{
   try {
     const { id } = req.params;
 
     if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid Studio ID format" });
+      return res.status(400).json({error: "Invalid Studio ID format"});
     }
 
-    const updatedData = { ...req.body };
+    const updatedData = { ...req.body};
     delete updatedData._id;
 
     const result = await studioCollection.updateOne(
@@ -134,7 +134,7 @@ app.put('/studios/:id', verifyToken, async (req, res) => {
     );
 
     if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Studio not found" });
+      return res.status(404).json({ error: "Studio not found"});
     }
 
     res.status(200).json({
@@ -144,7 +144,7 @@ app.put('/studios/:id', verifyToken, async (req, res) => {
 
   } catch (error) {
     console.error("Error updating studio:", error);
-    res.status(500).json({ error: "Failed to update studio" });
+    res.status(500).json({ error: "Failed to update studio"});
   }
 });
 
