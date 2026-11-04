@@ -70,7 +70,7 @@ const verifyToken = async(req, res, next) =>{
 
 
 // Add a new studio listing  with verifyToken
-app.post("/studios", verifyToken, async (req, res) => {
+app.post("/studios", verifyToken, async (req, res) =>{
   try {
     const data = req.body;
     data.hostEmail = data.hostEmail || req.user?.email;
@@ -80,7 +80,7 @@ app.post("/studios", verifyToken, async (req, res) => {
     res.status(201).send(result);
   } catch (error) {
     console.error("Error adding studio:", error);
-    res.status(500).json({ error: "Failed to add studio listing" });
+    res.status(500).json({ error: "Failed to add studio listing"});
   }
 });
 
