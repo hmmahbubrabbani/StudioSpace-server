@@ -100,19 +100,19 @@ app.get('/studios', async (req, res) =>{
 });
 
 // Get single studio details by ID 
-app.get('/studios/:id', async (req, res) => {
+app.get('/studios/:id', async (req, res) =>{
   try {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid Studio ID format" });
+      return res.status(400).json({ error: "Invalid Studio ID format"});
     }
-    const result = await studioCollection.findOne({ _id: new ObjectId(id) });
+    const result = await studioCollection.findOne({ _id: new ObjectId(id)});
     if (!result) {
       return res.status(404).json({ error: "Studio not found" });
     }
     res.send(result);
   } catch (error) {
-    res.status(400).json({ error: "Invalid Studio ID format" });
+    res.status(400).json({ error: "Invalid Studio ID format"});
   }
 });
 
