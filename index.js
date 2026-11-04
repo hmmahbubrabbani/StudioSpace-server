@@ -116,7 +116,7 @@ app.get('/studios/:id', async (req, res) =>{
   }
 });
 
-// UPDATE / EDIT a studio listingwith verifyToken
+// UPDATE / EDIT a studio listing with verifyToken
 app.put('/studios/:id', verifyToken, async (req, res) =>{
   try {
     const { id } = req.params;
@@ -149,7 +149,7 @@ app.put('/studios/:id', verifyToken, async (req, res) =>{
 });
 
 // Delete a studio listing with verifyToken
-app.delete('/studios/:id', verifyToken, async (req, res) => {
+app.delete('/studios/:id', verifyToken, async (req, res) =>{
   try {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) {
@@ -168,13 +168,13 @@ app.delete('/studios/:id', verifyToken, async (req, res) => {
 
 
 // Toggle Wishlist
-app.post("/wishlist/toggle", verifyToken, async (req, res) => {
+app.post("/wishlist/toggle", verifyToken, async (req, res) =>{
   try {
     const { userEmail, studioId } = req.body;
     const email = userEmail || req.user?.email;
 
     if (!email || !studioId) {
-      return res.status(400).json({ error: "User email and studio ID are required" });
+      return res.status(400).json({ error: "User email and studio ID are required"});
     }
 
 
@@ -182,7 +182,7 @@ app.post("/wishlist/toggle", verifyToken, async (req, res) => {
 
     if (!user) {
      
-      await userCollection.insertOne({ email, wishlist: [] });
+      await userCollection.insertOne({ email, wishlist: []});
       user = { email, wishlist: [] };
     }
 
@@ -192,22 +192,22 @@ app.post("/wishlist/toggle", verifyToken, async (req, res) => {
     if (index > -1) {
      
       wishlist.splice(index, 1);
-      await userCollection.updateOne({ email }, { $set: { wishlist } });
+      await userCollection.updateOne({ email }, { $set: { wishlist }});
       return res.json({ success: true, action: "removed", wishlist });
     } else {
      
       wishlist.push(studioId);
-      await userCollection.updateOne({ email }, { $set: { wishlist } });
+      await userCollection.updateOne({ email }, { $set: { wishlist }});
       return res.json({ success: true, action: "added", wishlist });
     }
   } catch (error) {
     console.error("Wishlist toggle error:", error);
-    res.status(500).json({ error: "Failed to update wishlist" });
+    res.status(500).json({ error: "Failed to update wishlist"});
   }
 });
 
 
-app.get("/wishlist", verifyToken, async (req, res) => {
+app.get("/wishlist", verifyToken, async (req, res) =>{
   try {
     const email = req.query.email || req.user?.email;
     if (!email) {
@@ -215,12 +215,12 @@ app.get("/wishlist", verifyToken, async (req, res) => {
     }
 
     const user = await userCollection.findOne({ email });
-    if (!user || !user.wishlist || user.wishlist.length === 0) {
+    if (!user || !user.wishlist || user.wishlist.length === 0){
       return res.json([]);
     }
 
     // উইশলিস্টে থাকা স্টুডিও আইডিগুলোর অবজেক্ট আইডি রূপান্তর করে স্টুডিও ফেচ করা
-    const studioObjectIds = user.wishlist.map(id => {
+    const studioObjectIds = user.wishlist.map(id =>{
       try { return new ObjectId(id); } catch(e) { return null; }
     }).filter(Boolean);
 
@@ -228,7 +228,7 @@ app.get("/wishlist", verifyToken, async (req, res) => {
     res.json(studios);
   } catch (error) {
     console.error("Error fetching wishlist:", error);
-    res.status(500).json({ error: "Failed to fetch wishlist" });
+    res.status(500).json({ error: "Failed to fetch wishlist"});
   }
 });
 
