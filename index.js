@@ -116,7 +116,8 @@ app.get('/studios/:id', async (req, res) =>{
   }
 });
 
-// UPDATE / EDIT a studio listing with verifyToken
+// UPDATE / EDIT a studio listing
+
 app.put('/studios/:id', verifyToken, async (req, res) =>{
   try {
     const { id } = req.params;
@@ -148,7 +149,7 @@ app.put('/studios/:id', verifyToken, async (req, res) =>{
   }
 });
 
-// Delete a studio listing with verifyToken
+// Delete a studio listing
 app.delete('/studios/:id', verifyToken, async (req, res) =>{
   try {
     const { id } = req.params;
@@ -219,7 +220,7 @@ app.get("/wishlist", verifyToken, async (req, res) =>{
       return res.json([]);
     }
 
-    // উইশলিস্টে থাকা স্টুডিও আইডিগুলোর অবজেক্ট আইডি রূপান্তর করে স্টুডিও ফেচ করা
+    
     const studioObjectIds = user.wishlist.map(id =>{
       try { return new ObjectId(id); } catch(e) { return null; }
     }).filter(Boolean);
@@ -237,30 +238,30 @@ app.get("/wishlist", verifyToken, async (req, res) =>{
 // BOOKING API ROUTES
 
 
-// Create a new booking request with Double-Booking Prevention 
+
 app.post("/bookings", verifyToken, async (req, res) => {
   try {
     const { studioId, bookingDate, startTime, hours } = req.body;
 
-    // ১. একই স্টুডিও এবং একই তারিখের সমস্ত বুকিং ফেচ করা (যা অলরেডি কনফার্মড)
+    
     const existingBookings = await bookingCollection.find({
       studioId: studioId,
       bookingDate: bookingDate,
       status: "Confirmed"
     }).toArray();
 
-    // ২. নতুন বুকিংয়ের শুরুর সময় ও শেষের সময় মিনিটে রূপান্তর করা
+    
     const [newStartHour, newStartMinute] = startTime.split(":").map(Number);
     const newStartTotalMinutes = newStartHour * 60 + newStartMinute;
     const newEndTotalMinutes = newStartTotalMinutes + Number(hours) * 60;
 
-    // ৩. ওভারল্যাপ বা টাইম কোলিশন চেক করা
+    
     for (const booking of existingBookings) {
       const [existStartHour, existStartMinute] = booking.startTime.split(":").map(Number);
       const existStartTotalMinutes = existStartHour * 60 + existStartMinute;
       const existEndTotalMinutes = existStartTotalMinutes + Number(booking.hours) * 60;
 
-      // ওভারল্যাপের শর্ত: (StartA < EndB) এবং (EndA > StartB)
+      
       const isOverlapping = 
         newStartTotalMinutes < existEndTotalMinutes && 
         newEndTotalMinutes > existStartTotalMinutes;
@@ -272,7 +273,7 @@ app.post("/bookings", verifyToken, async (req, res) => {
       }
     }
 
-    // ৪. কোনো ওভারল্যাপ না থাকলে নতুন বুকিং সেভ করা
+   
     const data = req.body;
     data.creatorEmail = req.user?.email || data.creatorEmail;
     data.createdAt = new Date();
@@ -286,8 +287,8 @@ app.post("/bookings", verifyToken, async (req, res) => {
   }
 });
 
-// Get bookings (filter by creator email or host email, Protected)
-app.get('/bookings', verifyToken, async (req, res) => {
+// Get bookings 
+app.get('/bookings', verifyToken, async (req, res) =>{
   try {
     const { creatorEmail, hostEmail } = req.query;
     let query = {};
@@ -297,16 +298,16 @@ app.get('/bookings', verifyToken, async (req, res) => {
     const result = await bookingCollection.find(query).toArray();
     res.send(result);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch bookings" });
+    res.status(500).json({ error: "Failed to fetch bookings"});
   }
 });
 
-// Update booking status (Protected)
+// Update booking status
 app.patch('/bookings/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid Booking ID format" });
+      return res.status(400).json({ error: "Invalid Booking ID format"});
     }
     const data = req.body;
     const result = await bookingCollection.updateOne(
@@ -315,27 +316,27 @@ app.patch('/bookings/:id', verifyToken, async (req, res) => {
     );
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Failed to update booking status" });
+    res.status(500).json({ error: "Failed to update booking status"});
   }
 });
 
-// Delete / Cancel a booking (Protected)
-app.delete('/bookings/:id', verifyToken, async (req, res) => {
+// Delete / Cancel a booking 
+app.delete('/bookings/:id', verifyToken, async (req, res) =>{
   try {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid Booking ID format" });
+      return res.status(400).json({ error: "Invalid Booking ID format"});
     }
-    const result = await bookingCollection.deleteOne({ _id: new ObjectId(id) });
+    const result = await bookingCollection.deleteOne({ _id: new ObjectId(id)});
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete booking" });
+    res.status(500).json({ error: "Failed to delete booking"});
   }
 });
 
 
 
-// ROOT CHECK ROUTE
+
 
 app.get('/', (req, res) => {
   res.send({ message: 'StudioSpace Backend Server is running fine with JWT & Wishlist Support!' });
