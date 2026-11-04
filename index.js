@@ -85,7 +85,7 @@ app.post("/studios", verifyToken, async (req, res) =>{
 });
 
 // Get all studios
-app.get('/studios', async (req, res) => {
+app.get('/studios', async (req, res) =>{
   try {
     const { category, hostEmail } = req.query;
     let query = {};
@@ -95,7 +95,7 @@ app.get('/studios', async (req, res) => {
     const result = await studioCollection.find(query).toArray();
     res.send(result);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch studios" });
+    res.status(500).json({ error: "Failed to fetch studios"});
   }
 });
 
