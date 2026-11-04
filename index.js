@@ -29,23 +29,23 @@ const mongoClient = await connectToMongoDB();
 const db = mongoClient.db("StudioSpaceDB");
 const studioCollection = db.collection("studios");
 const bookingCollection = db.collection("bookings");
-const userCollection = db.collection("users"); // 🔥 উইশলিস্ট স্টোর করার জন্য ইউজার কালেকশন
+const userCollection = db.collection("users"); 
 
 
 // JWT / TOKEN VERIFICATION PROXY 
 
-const verifyToken = async (req, res, next) => {
+const verifyToken = async(req, res, next) =>{
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Unauthorized access. No token provided." });
+      return res.status(401).json({ error: "Unauthorized access. No token provided."});
     }
 
     const token = authHeader.split(" ")[1];
 
     if (!token) {
-      return res.status(403).json({ error: "Forbidden access. Invalid token." });
+      return res.status(403).json({ error: "Forbidden access. Invalid token."});
     }
 
     // jwt.decode 
