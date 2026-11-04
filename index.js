@@ -7,15 +7,15 @@ import 'dotenv/config';
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// MongoDB Connection URI
+// MongoDB Connection
 const client = new MongoClient(process.env.MONGODB_URI);
 
-export async function connectToMongoDB() {
+export async function connectToMongoDB(){
   try {
     await client.connect();
     console.log("You successfully connected to MongoDB!");
     return client;
-  } catch (err) {
+  } catch (err){
     console.error("Failed to connect to MongoDB", err);
     process.exit(1);
   }
@@ -31,9 +31,9 @@ const studioCollection = db.collection("studios");
 const bookingCollection = db.collection("bookings");
 const userCollection = db.collection("users"); // 🔥 উইশলিস্ট স্টোর করার জন্য ইউজার কালেকশন
 
-// ==========================
+
 // JWT / TOKEN VERIFICATION PROXY 
-// ==========================
+
 const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -48,7 +48,7 @@ const verifyToken = async (req, res, next) => {
       return res.status(403).json({ error: "Forbidden access. Invalid token." });
     }
 
-    // Better Auth এর EdDSA অ্যালগরিদম জনিত এরর এড়াতে jwt.decode ব্যবহার করা হলো
+    // jwt.decode 
     const decoded = jwt.decode(token);
 
     if (!decoded) {
@@ -65,11 +65,11 @@ const verifyToken = async (req, res, next) => {
 };
 
 
-// ==========================
-// STUDIO API ROUTES
-// ==========================
 
-// Add a new studio listing (Protected with verifyToken)
+// STUDIO API ROUTES
+
+
+// Add a new studio listing  with verifyToken
 app.post("/studios", verifyToken, async (req, res) => {
   try {
     const data = req.body;
@@ -84,7 +84,7 @@ app.post("/studios", verifyToken, async (req, res) => {
   }
 });
 
-// Get all studios (Public)
+// Get all studios
 app.get('/studios', async (req, res) => {
   try {
     const { category, hostEmail } = req.query;
@@ -99,7 +99,7 @@ app.get('/studios', async (req, res) => {
   }
 });
 
-// Get single studio details by ID (Public)
+// Get single studio details by ID 
 app.get('/studios/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -116,7 +116,7 @@ app.get('/studios/:id', async (req, res) => {
   }
 });
 
-// UPDATE / EDIT a studio listing (Protected with verifyToken)
+// UPDATE / EDIT a studio listingwith verifyToken
 app.put('/studios/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -148,7 +148,7 @@ app.put('/studios/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Delete a studio listing (Protected with verifyToken)
+// Delete a studio listing with verifyToken
 app.delete('/studios/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -163,11 +163,11 @@ app.delete('/studios/:id', verifyToken, async (req, res) => {
 });
 
 
-// ==========================
-// WISHLIST API ROUTES (🔥 নতুন যুক্ত করা হলো)
-// ==========================
 
-// Toggle Wishlist (Add or Remove Studio from User's Favorites)
+// WISHLIST API ROUTES 
+
+
+// Toggle Wishlist
 app.post("/wishlist/toggle", verifyToken, async (req, res) => {
   try {
     const { userEmail, studioId } = req.body;
@@ -177,11 +177,11 @@ app.post("/wishlist/toggle", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "User email and studio ID are required" });
     }
 
-    // ইউজার ডকুমেন্টস খুঁজে বের করা (অথবা না থাকলে তৈরি করা)
+
     let user = await userCollection.findOne({ email });
 
     if (!user) {
-      // যদি ইউজার ডাটাবেজে না থাকে, তবে ইনিশিয়ালাইজ করে নেওয়া
+     
       await userCollection.insertOne({ email, wishlist: [] });
       user = { email, wishlist: [] };
     }
@@ -190,12 +190,12 @@ app.post("/wishlist/toggle", verifyToken, async (req, res) => {
     const index = wishlist.indexOf(studioId);
 
     if (index > -1) {
-      // যদি অলরেডি উইশলিস্টে থাকে, তবে রিমুভ (Unfavorite) করা
+     
       wishlist.splice(index, 1);
       await userCollection.updateOne({ email }, { $set: { wishlist } });
       return res.json({ success: true, action: "removed", wishlist });
     } else {
-      // না থাকলে উইশলিস্টে অ্যাড (Favorite) করা
+     
       wishlist.push(studioId);
       await userCollection.updateOne({ email }, { $set: { wishlist } });
       return res.json({ success: true, action: "added", wishlist });
@@ -206,7 +206,7 @@ app.post("/wishlist/toggle", verifyToken, async (req, res) => {
   }
 });
 
-// Get User's Wishlist Studios (Protected)
+
 app.get("/wishlist", verifyToken, async (req, res) => {
   try {
     const email = req.query.email || req.user?.email;
@@ -233,11 +233,11 @@ app.get("/wishlist", verifyToken, async (req, res) => {
 });
 
 
-// ==========================
-// BOOKING API ROUTES
-// ==========================
 
-// Create a new booking request with Double-Booking Prevention (Protected)
+// BOOKING API ROUTES
+
+
+// Create a new booking request with Double-Booking Prevention 
 app.post("/bookings", verifyToken, async (req, res) => {
   try {
     const { studioId, bookingDate, startTime, hours } = req.body;
@@ -254,7 +254,7 @@ app.post("/bookings", verifyToken, async (req, res) => {
     const newStartTotalMinutes = newStartHour * 60 + newStartMinute;
     const newEndTotalMinutes = newStartTotalMinutes + Number(hours) * 60;
 
-    // ৩. ওভারল্যাপ (Overlap) বা টাইম কোলিশন চেক করা
+    // ৩. ওভারল্যাপ বা টাইম কোলিশন চেক করা
     for (const booking of existingBookings) {
       const [existStartHour, existStartMinute] = booking.startTime.split(":").map(Number);
       const existStartTotalMinutes = existStartHour * 60 + existStartMinute;
@@ -334,9 +334,9 @@ app.delete('/bookings/:id', verifyToken, async (req, res) => {
 });
 
 
-// ==========================
+
 // ROOT CHECK ROUTE
-// ==========================
+
 app.get('/', (req, res) => {
   res.send({ message: 'StudioSpace Backend Server is running fine with JWT & Wishlist Support!' });
 });
